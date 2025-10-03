@@ -121,6 +121,24 @@ The frontend communicates with the backend through typed REST calls. See `src/li
 3. Callback page posts to backend to complete token exchange
 4. User is redirected to `/connections`
 
+Dry run / Simulation for local testing:
+- Call `GET {BACKEND_BASE_URL}/api/oauth/{connector}/authorize` to receive `{ authorization_url, state }`.
+- Simulate provider return by calling `POST {BACKEND_BASE_URL}/api/oauth/{connector}/callback` with `{ code: \"dev-code\", state }`.
+- Verify the Connections page reflects an active status if a `connection_id` was used and tokens were stored.
+
+Environment placeholders:
+- NEXT_PUBLIC_BACKEND_BASE_URL, NEXT_PUBLIC_FRONTEND_BASE_URL
+- Optional: NEXT_PUBLIC_* client IDs/secrets for connectors (if needed for UI-only scenarios)
+
+Dry run / Simulation for local testing:
+- Call `GET {BACKEND_BASE_URL}/api/oauth/{connector}/authorize` to receive `{ authorization_url, state }`.
+- Simulate provider return by calling `POST {BACKEND_BASE_URL}/api/oauth/{connector}/callback` with `{ code: \"dev-code\", state }`.
+- Verify the Connections page reflects an active status if a `connection_id` was used and tokens were stored.
+
+Environment placeholders:
+- NEXT_PUBLIC_BACKEND_BASE_URL, NEXT_PUBLIC_FRONTEND_BASE_URL
+- Optional: NEXT_PUBLIC_* client IDs/secrets for connectors (if needed for UI-only scenarios)
+
 ### Styling and Theme
 
 - **Tailwind CSS** with Ocean Professional theme (blue and amber accents)
