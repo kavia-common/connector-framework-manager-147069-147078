@@ -38,14 +38,23 @@ function OAuthCallbackContent() {
         }
 
         // Extract connector key from state parameter
-        // The state should contain the connector key and possibly other data
-        const stateData = JSON.parse(atob(state));
-        const connectorKey = stateData.connector_key;
-        const connectionId = stateData.connection_id;
+        // Prefer backend-signed opaque state. If state is JSON base64, parse. Otherwise, let backend validate.
+        let connectorKey: string | undefined;
+        let connectionId: number | undefined;
+        try {
+          const parsed = JSON.parse(atob(state));
+          connectorKey = parsed?.connector_key;
+          if (parsed?.connection_id != null) {
+            connectionId = Number(parsed.connection_id);
+          }
+        } catch {
+          // Non-JSON state; rely on backend to infer from signed state
+        }
 
+        // If connectorKey is missing we cannot construct URL path; show error
         if (!connectorKey) {
           setStatus('error');
-          setMessage('Invalid OAuth state parameter');
+          setMessage('Invalid or opaque OAuth state. Please restart the OAuth flow from the app.');
           return;
         }
 
@@ -64,7 +73,7 @@ function OAuthCallbackContent() {
           // Redirect to connections page after a short delay
           setTimeout(() => {
             router.push('/connections');
-          }, 2000);
+          }, 1500);
         } else {
           setStatus('error');
           setMessage(response.message || 'OAuth connection failed');
@@ -96,11 +105,11 @@ function OAuthCallbackContent() {
     switch (status) {
       case 'processing':
         return (
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" aria-hidden="true"></div>
         );
       case 'success':
         return (
-          <div className="rounded-full h-8 w-8 bg-green-100 flex items-center justify-center">
+          <div className="rounded-full h-8 w-8 bg-green-100 flex items-center justify-center" aria-hidden="true">
             <svg className="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
             </svg>
@@ -108,7 +117,7 @@ function OAuthCallbackContent() {
         );
       case 'error':
         return (
-          <div className="rounded-full h-8 w-8 bg-red-100 flex items-center justify-center">
+          <div className="rounded-full h-8 w-8 bg-red-100 flex items-center justify-center" aria-hidden="true">
             <svg className="h-5 w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
